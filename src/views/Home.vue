@@ -188,12 +188,24 @@ export default {
       let pageId = '82732'
       if(res.resultCode==0){
         console.log(res.resultData.datas,'+++')
-        let a=res.resultData.datas.elementHotList[0].jumpData.jumpUrl
-        let b = res.resultData.datas.elementTopList[0].jumpData.jumpUrl
-        let c = res.resultData.datas.elementSocialList[0].jumpData.jumpUrl
-        
+        let a,b,c;
+        let datas = res.resultData.datas
+        if(datas.elementHotList!=undefined&&datas.elementHotList.length!=0){
+          console.log(a,b,c,'aaaaa')
+          a=datas.elementHotList[0].jumpData.jumpUrl
+        }
+        if(datas.elementTopList!=undefined&&datas.elementTopList.length!=0){
+          console.log(a,b,c,'ppppppp')
+          b = datas.elementTopList[0].jumpData.jumpUrl
+        }
+        if(datas.elementSocialList!=undefined&&datas.elementSocialList.length!=0){
+          console.log(a,b,c,'xxxxx')
+          c = datas.elementSocialList[0].jumpData.jumpUrl
+        }
+        console.log(a,b,c,'ooooooooo')
         pageId = Math.max(a.match(rep)[0],b.match(rep)[0],c.match(rep)[0])
-        this.$api.getReview({reqData:{"pageId":pageId}}).then(resd=>{//82685 82732
+        console.log(pageId,'--+++')
+        this.$api.getReview({reqData:{"pageId":pageId,"lastId":"0"}}).then(resd=>{//82685 82732
           let arr = resd.resultData.normalComments;
           console.log(arr,'999999999999');
           this.getReviewList = [];
@@ -203,7 +215,8 @@ export default {
       }
     },
     initStime(){//今日数据+动态实时数据
-      this.$api.getToday().then(res=>{
+      this.$api.getToday({}).then(res=>{
+        console.log(res)
         let data = todayArray(res.resultData.datas)
         this.a = data.a;
         this.b = data.b;

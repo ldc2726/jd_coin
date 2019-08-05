@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-axios.defaults.baseURL = process.env.publicPath;
+axios.defaults.baseURL = process.env.publicPath;//
 /**
  * 请求拦截操作
  */
