@@ -33,6 +33,10 @@ export const getpageId=(params={})=>{//获取活动，banner，推荐页面，�
   let url = '/getpageId';
   return $getClient(url,params)
 }
+export const DingDing=(params={})=>{//dingding设置提醒金额
+  let url = '/dingding';
+  return $getClient(url,params)
+}
 
 export default {
   getHisCoin,
@@ -40,6 +44,7 @@ export default {
   getNews,
   getReview,
   getToday,
-  getpageId
+  getpageId,
+  DingDing
 }
 

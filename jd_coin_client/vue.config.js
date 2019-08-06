@@ -7,6 +7,9 @@ var axios = require('axios')
 var app = express()
 var apiRoutes = express.Router();
 var apiList = require('./src/http/express.js')
+
+
+
 module.exports = {
   baseUrl: process.env.NODE_ENV === "production" ? "./" : "/",
   // funDebug:process.env.NODE_ENV === "production" ?"development":"production",
@@ -23,6 +26,7 @@ module.exports = {
 // transpileDependencies: ['*'],
   devServer: {
     before(apiRoutes){
+      
       for(let item in apiList){
         apiList[item](apiRoutes)
       }
