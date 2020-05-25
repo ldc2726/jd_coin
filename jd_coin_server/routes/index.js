@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var config = require('./../config')
 var $get = require('./../http/axios')
+var $post = require('./../http/post')
 var schedule = require('node-schedule');
 const ChatBot = require('dingtalk-robot-sender');
 /* GET home page. */
@@ -10,47 +11,87 @@ router.get('/', function(req, res, next) {
 });
 
 function scheduleCronstyle(){//定时任务，每天9点，清空最大最小金额提醒
-  schedule.scheduleJob('0 0 9 * * *', function(){
-    config.maxPrice = config.max
-    config.minPrice = config.min
-  }); 
+    try {
+        schedule.scheduleJob('0 0 9 * * *', function(){
+            config.maxPrice = config.max
+            config.minPrice = config.min
+        }); 
+    } catch (error) {
+        console.log(error)
+    }
+  
 }
 
 scheduleCronstyle();
 
 function times(){//定时任务，检查是否提醒
-    var url = `${config.url}/gw/generic/hj/h5/m/latestPrice` //接口地址
-    $get(url,{ reqData: {} }).then((response) => {
-        let price = response.data.resultData.datas.price;
-        console.log(price)
-        let url ='http://193.112.104.226:3000'
-        let DingHtml = `黄金实时价格${price}元/g,已经达到你设置的提醒价格，赶紧去看看吧！\n访问地址：${url}`
-        if(price -config.maxPrice>0.5||config.minPrice-price > 0.5){
-            const robot = new ChatBot({
-                webhook: config.webhook1
-              });
-              // // 组合 baseUrl 和 acceessToekn
-              let content = DingHtml;
-              let at = {
-                "atMobiles":config.dingUser , 
-                "isAtAll": false
-              };
-              // 快速发送文本消息
-              robot.text(content, at);
-        }
-        if(price -config.maxPrice>0.5){
-            config.maxPrice = price;
-        }else if(config.minPrice-price > 0.5){
-            config.minPrice = price
-        }
-        clearTimeout(time);
-        time = null;
-        if(time == null){
-            time = setTimeout(times,3000)
-        }
-    }).catch((e) => {
-        console.log(e)
-    })
+    if(!time){
+        time = setTimeout(times,3000)
+    }
+    try {
+        var url = `${config.url}/gw/generic/hj/h5/m/latestPrice` //接口地址
+        $get(url,{ reqData: {} }).then((response) => {
+            if(!response){
+                return;
+            }
+            if(!response.data){
+                return;
+            }
+            if(!response.data.resultData){
+                return;
+            }
+            if(!response.data.resultData.datas){
+                return;
+            }
+            let price = response.data.resultData.datas.price;
+            console.log(price)
+            let url ='http://192.168.13.251:5000'
+            let DingHtml = `黄金实时价格${price}元/g,已经达到你设置的提醒价格，赶紧去看看吧！\n访问地址：${url}`
+            if(price -config.maxPrice>0.5||config.minPrice-price > 0.5){
+                //钉钉
+                // const robot = new ChatBot({
+                //     webhook: config.webhook1
+                //   });
+                //   // // 组合 baseUrl 和 acceessToekn
+                //   let content = DingHtml;
+                //   let at = {
+                //     "atMobiles":config.dingUser , 
+                //     "isAtAll": false
+                //   };
+                //   // 快速发送文本消息
+                //   robot.text(content, at);
+                //企业微信
+                let datas ={
+                    "msgtype": "markdown",
+                    "markdown": {
+                        "content": `黄金实时价格<font color=\"warning\">${price}元/g</font>,已经达到你设置的提醒价格，赶紧去看看吧！\n访问地址：[点击查看](${url})`
+                    },
+                };
+                $post(`${config.qywx}`,datas).then((response) => {
+                    // res.json(response.data)
+                }).catch((e) => {
+                    console.log(e)
+                })
+    
+    
+            }
+            if(price -config.maxPrice>0.5){
+                config.maxPrice = price;
+            }else if(config.minPrice-price > 0.5){
+                config.minPrice = price
+            }
+            clearTimeout(time);
+            time = null;
+            if(!time){
+                time = setTimeout(times,3000)
+            }
+        }).catch((e) => {
+            console.log(e)
+        })
+    } catch (error) {
+        console.log(error)
+    }
+    
 }
 var time = setTimeout(times,3000)
 router.get('/getToday', function(req, res){//当天数据
@@ -110,5 +151,20 @@ router.get('/setDingPrice', function(req, res){//设置提醒的最大最小值
   config.minPrice =req.query.min
   config.min =req.query.min
   res.json('ok')
+});
+
+router.get('/qywx', function(req, res){//获取活动，banner，推荐页面，猜测动态的pageId
+    let data ={
+        "msgtype": "text",
+        "text": {
+            "content": "笑什么笑",
+            'mentioned_list':['@陈倩']
+        }
+   }
+    $post(`${config.qywx}`,data).then((response) => {
+        res.json(response.data)
+    }).catch((e) => {
+        console.log(e)
+    })
 });
 module.exports = router;
