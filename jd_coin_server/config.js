@@ -9,7 +9,13 @@ let config = {
         "18521786936", 
         // "18336570444"
     ],
-    qywx:'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=fd8f9bf9-e594-4c2a-bc38-1e562172d11d'
+    qywx:'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=bbb4e3c1-ece7-4792-a356-63fc8d2c343f',
+    subscribeJJ:[//订阅的基金编号
+        '161726',
+        '011206',
+        '004241',
+        '004997'
+    ]
 
 }
 module.exports = config;

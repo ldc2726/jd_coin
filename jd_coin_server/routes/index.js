@@ -4,6 +4,7 @@ var config = require('./../config')
 var $get = require('./../http/axios')
 var $post = require('./../http/post')
 var schedule = require('node-schedule');
+const getJJCoin = require('./jijin')
 const ChatBot = require('dingtalk-robot-sender');
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -16,6 +17,10 @@ function scheduleCronstyle(){//定时任务，每天9点，清空最大最小金
             config.maxPrice = config.max
             config.minPrice = config.min
         }); 
+        schedule.scheduleJob('0 50 14 * * *', function(){
+            getJJCoin()
+        }); 
+        
     } catch (error) {
         console.log(error)
     }
@@ -45,7 +50,7 @@ function times(){//定时任务，检查是否提醒
             }
             let price = response.data.resultData.datas.price;
             console.log(price)
-            let url ='http://192.168.13.251:5000'
+            let url ='http://192.168.13.238:5000'
             let DingHtml = `黄金实时价格${price}元/g,已经达到你设置的提醒价格，赶紧去看看吧！\n访问地址：${url}`
             if(price -config.maxPrice>0.5||config.minPrice-price > 0.5){
                 //钉钉
